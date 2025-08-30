@@ -1,0 +1,39 @@
+﻿@model IEnumerable<Product>
+
+<div class="d-flex mb-3">
+    <h1>Каталог товарів</h1>
+    <a asp-action="Create" class="btn btn-dark ms-auto">Додати товар</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Назва</th>
+                <th>Категорія</th>
+                <th>Ціна</th>
+                <th>Кількість</th>
+                <th>Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td>@product.Name</td>
+                    <td>@product.Category?.Name</td>
+                    <td>@product.Price грн</td>
+                    <td>@product.Amount</td>
+                    <td>
+                        <a asp-action="Update" asp-route-id="@product.Id" class="btn btn-sm btn-success">Редагувати</a>
+                        <form asp-action="Delete" asp-route-id="@product.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Видалити цей товар?')">
+                                Видалити
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
