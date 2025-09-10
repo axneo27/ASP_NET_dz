@@ -32,8 +32,7 @@ namespace dz1
                 p.Property(p => p.Description)
                 .HasMaxLength(500);
                 p.Property(p => p.Price)
-                .HasColumnType("decimal(18,2)")
-                .HasDefaultValue(0m);
+                .HasDefaultValue(0);
                 p.Property(p => p.Amount)
                 .HasDefaultValue(0);
 

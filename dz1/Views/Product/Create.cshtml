@@ -1,44 +1,38 @@
-@model Product
+﻿@model CreateProductVM
 
-<h2>Додати новий товар</h2>
-
-<form asp-action="Create" method="post">
-    <div class="mb-3">
-        <label asp-for="Name" class="form-label">Назва</label>
-        <input asp-for="Name" class="form-control" required />
+<h1 class="text-center mb-3">Створення товару</h1>
+<form enctype="multipart/form-data" asp-action="Create" method="post" class="w-50 m-auto p-3">
+    <div class="form-group w-50 m-auto">
+        <label for="Name" class="form-label">Назва</label>
+        <input asp-for="Name" name="Name" class="form-control" type="text" />
     </div>
-
-    <div class="mb-3">
-        <label asp-for="CategoryId" class="form-label">Категорія</label>
-        <select asp-for="CategoryId" class="form-select" required>
-            <option value="">Виберіть категорію</option>
-            @foreach (var category in ViewBag.Categories)
+    <div class="form-group w-50 m-auto">
+        <label for="Description" class="form-label">Опис</label>
+        <input asp-for="Description" name="Description" class="form-control" type="text" />
+    </div>
+    <div class="form-group w-50 m-auto">
+        <label for="Price" class="form-label">Ціна</label>
+        <input min="0" asp-for="Price" name="Price" class="form-control" type="number" />
+    </div>
+    <div class="form-group w-50 m-auto">
+        <label for="Amount" class="form-label">Кількість</label>
+        <input min="0" asp-for="Amount" name="Amount" class="form-control" type="number" />
+    </div>
+    <div class="form-group w-50 m-auto">
+        <label for="Category" class="form-label">Категорія</label>
+        <select asp-for="CategoryId" class="form-control">
+            @foreach(var category in Model.Categories)
             {
                 <option value="@category.Id">@category.Name</option>
             }
         </select>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="Price" class="form-label">Ціна</label>
-        <input asp-for="Price" class="form-control" type="number" step="0.01" required />
+    <div class="form-group w-50 m-auto">
+        <label for="Image" class="form-label">Зображення</label>
+        <input accept="image/*" name="File" asp-for="Image" class="form-control" type="file"/>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="Amount" class="form-label">Кількість</label>
-        <input asp-for="Amount" class="form-control" type="number" required />
+    <div class="w-50 m-auto d-flex">
+        <input class="btn btn-success flex-grow-1 mx-1 my-3" type="submit" value="Створити" />
+        <a asp-action="Index" class="btn btn-dark flex-grow-1 mx-1 my-3">Повернутися</a>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="Description" class="form-label">Опис</label>
-        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Image" class="form-label">URL зображення</label>
-        <input asp-for="Image" class="form-control" type="url" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Зберегти</button>
-    <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
 </form>

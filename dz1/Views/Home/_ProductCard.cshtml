@@ -1,0 +1,42 @@
+﻿@inject IHttpContextAccessor HttpContextAccessor
+@model Product
+<div col style="min-width: 200px">
+    <div class="card p-2 product-card @(Model.Amount > 0 ? "" : "opacity-25")">
+        <a asp-action="details">
+            <img class="card-img-top product-cover" src="~/images/@(string.IsNullOrEmpty(Model.Image) ? "default.jpeg" : Model.Image)" alt="@Model.Name">
+        </a>
+        <div class="card-body d-flex flex-column">
+            <a class="product-title" asp-action="details">
+                @Model.Name
+            </a>
+            <div class="d-flex align-items-end">
+                <div class="d-flex flex-column flex-grow-1">
+                    <span class="product-price">@Model.Price ₴</span>
+                    @if(Model.Amount > 0)
+                    {
+                        <span class="product-available flex-grow-1">Є в наявності</span>
+                    }
+                    else
+                    {
+                        <span class="product-not-available flex-grow-1">Немає в наявності</span>
+                    }
+                </div>
+                @if (Model.Amount > 0)
+                {
+                    if(HttpContextAccessor.HttpContext.Session.ItemInCart(Model.Id))
+                    {
+                        <a asp-action="RemoveFromCart" asp-route-productId="@Model.Id">
+                            <i class="bi bi-cart-check-fill product-cart-icon flex-grow-0"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="AddToCart" asp-route-productId="@Model.Id">
+                            <i class="bi bi-cart product-cart-icon flex-grow-0"></i>
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

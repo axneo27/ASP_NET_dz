@@ -1,20 +1,22 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using dz1.Models;
+using dz1.Repositories.Categories;
+using dz1.ViewModels;
 
 namespace dz1.Controllers
 {
     public class CategoryController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public CategoryController(AppDbContext context)
+        public CategoryController(ICategoryRepository categoryRepository)
         {
-            _context = context;
+            _categoryRepository = categoryRepository;
         }
 
         public IActionResult Index()
         {
-            IEnumerable<Category> categories = _context.Categories;
+            IEnumerable<Category> categories = _categoryRepository.Categories;
             return View(categories);
         }
 
@@ -27,62 +29,83 @@ namespace dz1.Controllers
         // POST
         [HttpPost]
         [ValidateAntiForgeryToken] // Захист від CSRF атак
-        public IActionResult Create(Category model)
+        public IActionResult Create(CreateCategoryVM viewModel)
         {
-            var res = _context.Categories
-                .Any(c => c.Name.ToLower() == model.Name.ToLower());
-            if(res)
+            if(!ModelState.IsValid)
             {
-                return RedirectToAction("Index");
+                return View(viewModel);
             }
 
-            _context.Categories.Add(model);
-            _context.SaveChanges();
+            var res = _categoryRepository.IsExists(viewModel.Name!);
+            if (res)
+            {
+                ModelState.AddModelError("Name", $"Категорія \"{viewModel.Name}\" вже існує");
+                return View(viewModel);
+            }
+
+            var model = new Category
+            {
+                Name = viewModel.Name!
+            };
+
+            _categoryRepository.Create(model);
             return RedirectToAction("Index");
         }
 
         // GET
         public IActionResult Update(int id)
         {
-            var model = _context.Categories.Find(id);
+            var model = _categoryRepository.GetById(id);
             if(model == null)
             {
                 return RedirectToAction("Index");
             }
 
-            return View(model);
+            var viewModel = new UpdateCategoryVM
+            {
+                Id = model.Id,
+                Name = model.Name
+            };
+            
+            return View(viewModel);
         }
 
         // POST
         [HttpPost]
         [ValidateAntiForgeryToken] // Захист від CSRF атак
-        public IActionResult Update(Category model)
+        public IActionResult Update(UpdateCategoryVM viewModel)
         {
-            var res = _context.Categories
-                .Any(c => c.Name.ToLower() == model.Name.ToLower());
-            if (res)
+            if (!ModelState.IsValid)
             {
-                return RedirectToAction("Index");
+                return View(viewModel);
             }
 
-            _context.Categories.Update(model);
-            _context.SaveChanges();
+            var res = _categoryRepository.IsExists(viewModel.Name!);
+            if (res)
+            {
+                ModelState.AddModelError("Name", $"Категорія \"{viewModel.Name}\" вже існує");
+                return View(viewModel);
+            }
+
+            var model = new Category
+            {
+                Id = viewModel.Id,
+                Name = viewModel.Name!
+            };
+
+            _categoryRepository.Update(model);
             return RedirectToAction("Index");
         }
 
-        // POST
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
-            var category = _context.Categories.Find(id);
+            var category = _categoryRepository.GetById(id);
+
             if (category != null)
             {
-                var productCount = _context.Products.Count(p => p.CategoryId == id);
-                _context.Categories.Remove(category);
-                _context.SaveChanges();
-                TempData["Success"] = $"Категорію '{category.Name}' та {productCount} пов'язаних товарів було видалено";
+                _categoryRepository.Delete(category);
             }
+            
             return RedirectToAction("Index");
         }
     }

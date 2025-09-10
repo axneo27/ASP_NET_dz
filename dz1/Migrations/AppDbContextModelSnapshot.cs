@@ -67,10 +67,10 @@ namespace dz1.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<decimal>("Price")
+                    b.Property<double>("Price")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(18,2)")
-                        .HasDefaultValue(0m);
+                        .HasColumnType("float")
+                        .HasDefaultValue(0.0);
 
                     b.HasKey("Id");
 

@@ -11,8 +11,8 @@ using dz1;
 namespace dz1.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250830075532_Products_Categories")]
-    partial class Products_Categories
+    [Migration("20250823081132_Products and Categories")]
+    partial class ProductsandCategories
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -70,10 +70,10 @@ namespace dz1.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<decimal>("Price")
+                    b.Property<double>("Price")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(18,2)")
-                        .HasDefaultValue(0m);
+                        .HasColumnType("float")
+                        .HasDefaultValue(0.0);
 
                     b.HasKey("Id");
 

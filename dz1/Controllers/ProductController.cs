@@ -1,67 +1,92 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using dz1.Models;
+using dz1.Repositories.Products;
+using dz1.ViewModels;
 
 namespace dz1.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly IProductRepository _repository;
 
-        public ProductController(AppDbContext context)
+        public ProductController(IProductRepository repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         public IActionResult Index()
         {
-            var products = _context.Products.Include(p => p.Category).ToList();
+            var products = _repository.Products;
             return View(products);
         }
 
         public IActionResult Create()
         {
-            ViewBag.Categories = _context.Categories.ToList();
+            ViewBag.Categories = new SelectList(_repository.GetCategories(), "Id", "Name");
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Product model)
+        public IActionResult Create([FromForm] CreateProductVM viewModel)
         {
-            _context.Products.Add(model);
-            _context.SaveChanges();
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                var model = new Product
+                {
+                    Name = viewModel.Name ?? string.Empty,
+                    Description = viewModel.Description ?? string.Empty,
+                    Price = (decimal)viewModel.Price,
+                    CategoryId = viewModel.CategoryId,
+                    Amount = viewModel.Amount
+                };
+
+                if (viewModel.Image != null)
+                {
+                    model.Image = _repository.SaveImage(viewModel.Image);
+                }
+
+                _repository.Create(model);
+                TempData["Success"] = "Товар успішно створено";
+                return RedirectToAction("Index");
+            }
+
+            ViewBag.Categories = new SelectList(_repository.GetCategories(), "Id", "Name");
+            return View(viewModel);
         }
 
         public IActionResult Update(int id)
         {
-            var product = _context.Products.Find(id);
-            if (product == null) return RedirectToAction("Index");
-            
-            ViewBag.Categories = _context.Categories.ToList();
+            var product = _repository.GetById(id);
+            if (product == null)
+                return NotFound();
+
+            ViewBag.Categories = new SelectList(_repository.GetCategories(), "Id", "Name");
             return View(product);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Update(Product model)
+        public IActionResult Update(int id, Product product)
         {
-            _context.Products.Update(model);
-            _context.SaveChanges();
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                _repository.Update(product);
+                TempData["Success"] = "Товар успішно оновлено";
+                return RedirectToAction(nameof(Index));
+            }
+            ViewBag.Categories = new SelectList(_repository.GetCategories(), "Id", "Name");
+            return View(product);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
-            var product = _context.Products.Find(id);
-            if (product != null)
-            {
-                _context.Products.Remove(product);
-                _context.SaveChanges();
-            }
-            return RedirectToAction("Index");
+            _repository.Delete(id);
+            TempData["Success"] = "Товар успішно видалено";
+            return RedirectToAction(nameof(Index));
         }
     }
 }
