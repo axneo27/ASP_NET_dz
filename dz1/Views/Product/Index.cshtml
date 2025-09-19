@@ -1,12 +1,59 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
+﻿@model IEnumerable<Product>
 
-<div class="d-flex">
+<div class="d-flex mb-4">
     <h1 class="flex-grow-1">Товари</h1>
     <div class="flex-grow-1 text-end">
-        <a class="btn btn-dark" asp-controller="Product" asp-action="Create">Додати товар</a>
+        <a class="btn btn-dark" asp-action="Create">Додати товар</a>
     </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Фото</th>
+                <th>Назва</th>
+                <th>Категорія</th>
+                <th>Ціна</th>
+                <th>Кількість</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td style="width: 100px">
+                        <img src="~/images/@(string.IsNullOrEmpty(product.Image) ? "default.jpeg" : product.Image)" 
+                             class="img-thumbnail" alt="@product.Name">
+                    </td>
+                    <td>@product.Name</td>
+                    <td>@product.Category?.Name</td>
+                    <td>@product.Price ₴</td>
+                    <td>@product.Amount</td>
+                    <td>
+                        <div class="btn-group">
+                            <a asp-action="Update" asp-route-id="@product.Id" class="btn btn-sm btn-primary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@product.Id" method="post" 
+                                  onsubmit="return confirm('Ви впевнені що хочете видалити цей товар?');">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>

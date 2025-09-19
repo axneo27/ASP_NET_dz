@@ -36,12 +36,14 @@
                         </li>
                     </ul>
                 </div>
-                <i style="font-size: 1.5em;" class="bi bi-cart-fill me-3 nav-cart-icon">
-                    <span style="font-size: 0.5em; top: 25%;" class="position-absolute start-95 translate-middle badge rounded-pill bg-success">
-                        @(HttpContextAccessor.HttpContext == null ? 0 
-                        : HttpContextAccessor.HttpContext.Session.GetCartCount())
-                    </span>
-                </i>
+                <a asp-controller="Cart" asp-action="Index" class="text-decoration-none">
+                    <i style="font-size: 1.5em;" class="bi bi-cart-fill me-3 nav-cart-icon">
+                        <span style="font-size: 0.5em; top: 25%;" class="position-absolute start-95 translate-middle badge rounded-pill bg-success">
+                            @(HttpContextAccessor.HttpContext == null ? 0 
+                            : HttpContextAccessor.HttpContext.Session.GetCartCount())
+                        </span>
+                    </i>
+                </a>
             </div>
         </nav>
     </header>

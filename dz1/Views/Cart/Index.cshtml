@@ -1,0 +1,55 @@
+@model IEnumerable<Product>
+
+@{
+    ViewData["Title"] = "Кошик";
+}
+
+<h2>Кошик</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Ваш кошик порожній
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Фото</th>
+                    <th>Назва</th>
+                    <th>Ціна</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model)
+                {
+                    <tr>
+                        <td style="width: 100px">
+                            <img src="~/images/@(string.IsNullOrEmpty(product.Image) ? "default.jpeg" : product.Image)"
+                                 class="img-thumbnail" alt="@product.Name">
+                        </td>
+                        <td>@product.Name</td>
+                        <td>@product.Price ₴</td>
+                        <td>
+                            <a asp-controller="Cart" asp-action="RemoveFromCart"
+                               asp-route-productId="@product.Id" class="btn btn-danger">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2" class="text-end"><strong>Всього:</strong></td>
+                    <td><strong>@Model.Sum(p => p.Price) ₴</strong></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+}
