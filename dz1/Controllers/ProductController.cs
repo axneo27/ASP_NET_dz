@@ -1,30 +1,35 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using dz1.Models;
-using dz1.Repositories.Products;
+using dz1.Helpers;
 using dz1.ViewModels;
 
 namespace dz1.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly IProductRepository _repository;
+        private readonly AppDbContext _context;
 
-        public ProductController(IProductRepository repository)
+        public ProductController(AppDbContext context)
         {
-            _repository = repository;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(int pageNumber = 1, int pageSize = 5)
         {
-            var products = _repository.Products;
-            return View(products);
+            var products = _context.Products.Include(p => p.Category);
+            var paginatedProducts = PaginatedList<Product>.Create(products, pageNumber, pageSize);
+            return View(paginatedProducts);
         }
 
         public IActionResult Create()
         {
-            ViewBag.Categories = new SelectList(_repository.GetCategories(), "Id", "Name");
-            return View();
+            var viewModel = new CreateProductVM
+            {
+                Categories = _context.Categories.ToList()
+            };
+            return View(viewModel);
         }
 
         [HttpPost]
@@ -44,25 +49,26 @@ namespace dz1.Controllers
 
                 if (viewModel.Image != null)
                 {
-                    model.Image = _repository.SaveImage(viewModel.Image);
+                    model.Image = SaveImage(viewModel.Image);
                 }
 
-                _repository.Create(model);
+                _context.Products.Add(model);
+                _context.SaveChanges();
                 TempData["Success"] = "Товар успішно створено";
                 return RedirectToAction("Index");
             }
 
-            ViewBag.Categories = new SelectList(_repository.GetCategories(), "Id", "Name");
+            viewModel.Categories = _context.Categories.ToList();
             return View(viewModel);
         }
 
         public IActionResult Update(int id)
         {
-            var product = _repository.GetById(id);
+            var product = _context.Products.Find(id);
             if (product == null)
                 return NotFound();
 
-            ViewBag.Categories = new SelectList(_repository.GetCategories(), "Id", "Name");
+            ViewBag.Categories = new SelectList(_context.Categories.ToList(), "Id", "Name", product.CategoryId);
             return View(product);
         }
 
@@ -70,23 +76,58 @@ namespace dz1.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Update(int id, Product product)
         {
+            if (id != product.Id)
+                return NotFound();
+
             if (ModelState.IsValid)
             {
-                _repository.Update(product);
+                _context.Update(product);
+                _context.SaveChanges();
                 TempData["Success"] = "Товар успішно оновлено";
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.Categories = new SelectList(_repository.GetCategories(), "Id", "Name");
+            ViewBag.Categories = new SelectList(_context.Categories.ToList(), "Id", "Name", product.CategoryId);
             return View(product);
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
-            _repository.Delete(id);
-            TempData["Success"] = "Товар успішно видалено";
-            return RedirectToAction(nameof(Index));
+            var product = _context.Products.Find(id);
+            if (product != null)
+            {
+                // Delete image file if exists
+                if (!string.IsNullOrEmpty(product.Image))
+                {
+                    var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", product.Image);
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        System.IO.File.Delete(imagePath);
+                    }
+                }
+
+                _context.Products.Remove(product);
+                _context.SaveChanges();
+                TempData["Success"] = $"Товар '{product.Name}' було видалено";
+            }
+            return RedirectToAction("Index");
+        }
+
+        private string SaveImage(IFormFile imageFile)
+        {
+            string uniqueFileName = string.Empty;
+            if (imageFile != null)
+            {
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+                Directory.CreateDirectory(uploadsFolder); // Ensure directory exists
+                uniqueFileName = Guid.NewGuid().ToString() + "_" + imageFile.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    imageFile.CopyTo(fileStream);
+                }
+            }
+            return uniqueFileName;
         }
     }
 }

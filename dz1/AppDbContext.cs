@@ -10,6 +10,7 @@ namespace dz1
 
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,7 +33,8 @@ namespace dz1
                 p.Property(p => p.Description)
                 .HasMaxLength(500);
                 p.Property(p => p.Price)
-                .HasDefaultValue(0);
+                .HasPrecision(18, 2)
+                .HasDefaultValue(0m);
                 p.Property(p => p.Amount)
                 .HasDefaultValue(0);
 
@@ -41,6 +43,18 @@ namespace dz1
                 .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<User>(u =>
+            {
+                u.HasKey(u => u.Id);
+                u.Property(u => u.FirstName).IsRequired().HasMaxLength(50);
+                u.Property(u => u.LastName).IsRequired().HasMaxLength(50);
+                u.Property(u => u.UserName).IsRequired().HasMaxLength(50);
+                u.Property(u => u.Email).IsRequired();
+                u.Property(u => u.Password).IsRequired();
+                u.HasIndex(u => u.UserName).IsUnique();
+                u.HasIndex(u => u.Email).IsUnique();
             });
         }
     }

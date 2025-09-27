@@ -1,4 +1,5 @@
-﻿@model IEnumerable<Category>
+﻿@model PaginatedList<Category>
+@using dz1.Helpers
 @{
     ViewData["Title"] = "Категорії";
 }
@@ -28,20 +29,40 @@
                         <td class="text-center">@category.Name</td>
                         <td class="text-end">
                             <a asp-action="Update" asp-route-id="@category.Id" class="btn btn-success m-1">Редагувати</a>
-                            <button onclick="deleteCategory('@System.Text.Json.JsonSerializer.Serialize(category)')" data-bs-toggle="modal" data-bs-target="#deleteCategory" class="btn btn-danger m-1">Видалити</button>
+                            <button type="button" class="btn btn-danger m-1" data-bs-toggle="modal" data-bs-target="#deleteModal" 
+                                    data-category-id="@category.Id" data-category-name="@category.Name">
+                                Видалити
+                            </button>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
+
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex - 1)">Попередня</a>
+            </li>
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-pageNumber="@i">@i</a>
+                </li>
+            }
+            <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                <a class="page-link" asp-action="Index" asp-route-pageNumber="@(Model.PageIndex + 1)">Наступна</a>
+            </li>
+        </ul>
+    </nav>
 }
 else
 {
     <h1 class="text-center">Категорії не знайдено</h1>
 }
 
-<div id="deleteCategory" class="modal" tabindex="-1">
+<div id="deleteModal" class="modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
