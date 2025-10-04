@@ -82,5 +82,26 @@ namespace spr421_spotify_clone.DAL.Repositories.Track
                 }
             }
         }
+            /// <summary>
+            /// Оновити трек
+            /// </summary>
+            public async Task UpdateAsync(TrackEntity entity)
+            {
+                _context.Tracks.Update(entity);
+                await _context.SaveChangesAsync();
+            }
+
+            /// <summary>
+            /// Видалити трек
+            /// </summary>
+            public async Task DeleteAsync(string id)
+            {
+                var track = await _context.Tracks.FindAsync(id);
+                if (track != null)
+                {
+                    _context.Tracks.Remove(track);
+                    await _context.SaveChangesAsync();
+                }
+            }
     }
 }

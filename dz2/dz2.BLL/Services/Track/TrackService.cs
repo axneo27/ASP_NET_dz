@@ -61,5 +61,50 @@ namespace spr421_spotify_clone.BLL.Services.Track
                 Message = $"Трек '{entity.Title}' додано"
             };
         }
+        
+            public async Task<ServiceResponse> UpdateAsync(UpdateTrackDto dto)
+            {
+                var track = await _trackRepository.GetByIdAsync(dto.Id);
+                if (track == null)
+                {
+                    return new ServiceResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        Message = $"Трек з id '{dto.Id}' не знайдено"
+                    };
+                }
+                _mapper.Map(dto, track);
+                await _trackRepository.UpdateAsync(track);
+                return new ServiceResponse { Message = $"Трек '{track.Title}' оновлено" };
+            }
+        
+            public async Task<ServiceResponse> DeleteAsync(DeleteTrackDto dto)
+            {
+                var track = await _trackRepository.GetByIdAsync(dto.Id);
+                if (track == null)
+                {
+                    return new ServiceResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        Message = $"Трек з id '{dto.Id}' не знайдено"
+                    };
+                }
+                await _trackRepository.DeleteAsync(track);
+                return new ServiceResponse { Message = $"Трек видалено" };
+            }
+        
+            public async Task<ServiceResponse> GetByTitleAsync(string title)
+            {
+                var tracks = await _trackRepository.GetByTitleAsync(title);
+                return new ServiceResponse { Data = tracks };
+            }
+        
+            public async Task<ServiceResponse> GetByGenreAsync(string genreId)
+            {
+                var tracks = await _trackRepository.GetByGenreAsync(genreId);
+                return new ServiceResponse { Data = tracks };
+            }
     }
 }

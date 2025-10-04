@@ -7,6 +7,7 @@ namespace spr421_spotify_clone.BLL.Services
         public string Message { get; set; } = string.Empty;
         public bool IsSuccess { get; set; } = true;
         public object? Payload { get; set; } = null;
+        public object? Data { get; set; } = null;
         public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.OK;
     }
 }
