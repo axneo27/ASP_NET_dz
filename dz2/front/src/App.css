@@ -1,0 +1,12 @@
+body {
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+    color: white;
+}
+
+a:hover {
+    color: rgb(210, 210, 210);
+}
