@@ -16,6 +16,7 @@ using spr421_spotify_clone.DAL.Repositories.Artist;
 using spr421_spotify_clone.DAL.Repositories.Genre;
 using spr421_spotify_clone.DAL.Repositories.Track;
 using spr421_spotify_clone.Infrastructure;
+using spr421_spotify_clone.Middleware;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -117,6 +118,10 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("dev");
+
+// Request logging middleware
+app.UseMiddleware<RequestLoggingMiddleware>();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
